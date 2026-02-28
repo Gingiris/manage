@@ -1,5 +1,19 @@
+import { ActivityIcon, Plus, RefreshCw, Trash2 } from "lucide-react";
 import type { ActivityWithActor } from "@/drizzle/types";
 import { guessTimezone, toDateStringWithDay } from "../utils/date";
+
+export function getActionIcon(action: string) {
+	switch (action) {
+		case "created":
+			return { icon: Plus, color: "text-emerald-500", bg: "bg-emerald-500/10" };
+		case "updated":
+			return { icon: RefreshCw, color: "text-amber-500", bg: "bg-amber-500/10" };
+		case "deleted":
+			return { icon: Trash2, color: "text-red-500", bg: "bg-red-500/10" };
+		default:
+			return { icon: ActivityIcon, color: "text-muted-foreground", bg: "bg-muted" };
+	}
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: flexible date parameter handling
 function toDateString(date: any) {
@@ -115,6 +129,62 @@ function generateContextualMessage(
 		default:
 			return `${item.action} ${item.type} **${itemName}**`;
 	}
+}
+
+const typeLabels: Record<string, string> = {
+	tasklist: "TaskList",
+	task: "Task",
+	project: "Project",
+	blob: "File",
+	event: "Event",
+	comment: "Comment",
+	post: "Post",
+};
+
+export function formatEventTypeLabel(type: string, action: string): string {
+	return `${typeLabels[type] || type}.${action}`;
+}
+
+export function getEventDescription(type: string, action: string): string {
+	const descriptions: Record<string, Record<string, string>> = {
+		task: {
+			created: "A new task was added to the project.",
+			updated: "An existing task was modified.",
+			deleted: "A task was removed from the project.",
+		},
+		tasklist: {
+			created: "A new task list was created.",
+			updated: "A task list was modified.",
+			deleted: "A task list was removed.",
+		},
+		project: {
+			created: "A new project was created.",
+			updated: "Project settings or details were modified.",
+			deleted: "A project was removed.",
+		},
+		blob: {
+			created: "A file was uploaded.",
+			updated: "A file was modified.",
+			deleted: "A file was removed.",
+		},
+		event: {
+			created: "A new calendar event was created.",
+			updated: "A calendar event was modified.",
+			deleted: "A calendar event was removed.",
+		},
+		comment: {
+			created: "A comment was added.",
+			updated: "A comment was edited.",
+			deleted: "A comment was removed.",
+		},
+		post: {
+			created: "A new post was published.",
+			updated: "A post was edited.",
+			deleted: "A post was removed.",
+		},
+	};
+
+	return descriptions[type]?.[action] || `${typeLabels[type] || type} was ${action}.`;
 }
 
 export function generateObjectDiffMessage(item: ActivityWithActor) {

@@ -74,7 +74,7 @@ export type EventWithCreator = CalendarEvent & {
 };
 
 export type ActivityWithActor = Activity & {
-	actor: Pick<User, "id" | "firstName" | "image">;
+	actor: Pick<User, "id" | "firstName" | "image" | "email">;
 };
 
 export type NotificationWithUser = Notification & {

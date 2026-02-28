@@ -88,3 +88,16 @@ export function toStartOfHour(date: Date) {
 export function toMs(durationInMinutes: number) {
 	return durationInMinutes * 60 * 1000;
 }
+
+export function toFullDateTimeString(date: Date, timeZone: string) {
+	return date.toLocaleString("en-US", {
+		timeZone,
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+		hour12: true,
+	});
+}

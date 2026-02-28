@@ -1,107 +1,99 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
 import { ActivityIcon } from "lucide-react";
 import { useParams } from "next/navigation";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { useMemo } from "react";
 import Markdown from "react-markdown";
 import { Spinner, SpinnerWithSpacing } from "@/components/core/loaders";
+import { UserAvatar } from "@/components/core/user-avatar";
 import { Button } from "@/components/ui/button";
 import type { ActivityWithActor } from "@/drizzle/types";
-import { generateObjectDiffMessage } from "@/lib/activity/message";
+import {
+	formatEventTypeLabel,
+	generateObjectDiffMessage,
+	getActionIcon,
+} from "@/lib/activity/message";
 import { guessTimezone, toDateTimeString } from "@/lib/utils/date";
 import { useTRPCClient } from "@/trpc/client";
+import { ActivityDetailPanel } from "./activity-detail-panel";
 
 const ACTIVITIES_LIMIT = 25;
 
-function getActionConfig(action: string) {
-	switch (action) {
-		case "created":
-			return {
-				label: "Created",
-				bgColor: "bg-emerald-100 dark:bg-emerald-900/50",
-				textColor: "text-emerald-600 dark:text-emerald-400",
-			};
-		case "updated":
-			return {
-				label: "Updated",
-				bgColor: "bg-blue-100 dark:bg-blue-900/50",
-				textColor: "text-blue-600 dark:text-blue-400",
-			};
-		case "deleted":
-			return {
-				label: "Deleted",
-				bgColor: "bg-red-100 dark:bg-red-900/50",
-				textColor: "text-red-600 dark:text-red-400",
-			};
-		default:
-			return {
-				label: action,
-				bgColor: "bg-muted",
-				textColor: "text-muted-foreground",
-			};
-	}
-}
-
-export function ActivityItem({ item }: { item: ActivityWithActor }) {
-	const actionConfig = getActionConfig(item.action);
+export function ActivityItem({
+	item,
+	onSelect,
+}: { item: ActivityWithActor; onSelect: (id: number) => void }) {
+	const actionConfig = getActionIcon(item.action);
+	const ActionIcon = actionConfig.icon;
 
 	return (
-		<div className="py-4 px-4 hover:bg-muted/30 rounded-lg transition-colors">
-			<div className="space-y-1 text-center">
-				<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-					<span className="font-semibold text-foreground">
-						{item.actor.firstName}
-					</span>
-					<span
-						className={`text-xs font-medium px-2 py-0.5 rounded ${actionConfig.bgColor} ${actionConfig.textColor}`}
-					>
-						{actionConfig.label}
-					</span>
-					<span
-						className="text-xs text-muted-foreground"
-						title={toDateTimeString(item.createdAt, guessTimezone)}
-					>
-						{formatDistanceToNow(new Date(item.createdAt), {
-							addSuffix: true,
-						})}
-					</span>
+		<button
+			type="button"
+			onClick={() => onSelect(item.id)}
+			className="w-full text-left py-4 px-4 hover:bg-muted/40 rounded-lg transition-colors cursor-pointer"
+		>
+			<div className="flex items-start gap-3">
+				<div
+					className={`p-1.5 rounded-lg ${actionConfig.bg} mt-0.5 shrink-0`}
+				>
+					<ActionIcon className={`h-4 w-4 ${actionConfig.color}`} />
 				</div>
 
-				<div className="text-sm text-muted-foreground">
-					<Markdown
-						components={{
-							p: ({ children }) => (
-								<p className="leading-relaxed">{children}</p>
-							),
-							strong: ({ children }) => (
-								<strong className="font-semibold text-foreground">
-									{children}
-								</strong>
-							),
-							ul: ({ children }) => (
-								<ul className="mt-2 space-y-1 text-sm">{children}</ul>
-							),
-							li: ({ children }) => (
-								<li className="flex items-center justify-center gap-2">
-									<span className="text-primary h-1.5 w-1.5 rounded-full bg-current flex-shrink-0" />
-									<span>{children}</span>
-								</li>
-							),
-						}}
-					>
-						{generateObjectDiffMessage(item)}
-					</Markdown>
+				<div className="flex-1 min-w-0">
+					<div className="flex items-center justify-between gap-2">
+						<span className="text-xs text-muted-foreground">
+							{toDateTimeString(
+								new Date(item.createdAt),
+								guessTimezone,
+							)}
+						</span>
+					</div>
+
+					<div className="mt-1">
+						<span className="font-semibold text-sm">
+							{formatEventTypeLabel(item.type, item.action)}
+						</span>
+					</div>
+
+					<div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+						<Markdown
+							components={{
+								p: ({ children }) => (
+									<span className="leading-relaxed">{children}</span>
+								),
+								strong: ({ children }) => (
+									<strong className="font-semibold text-foreground">
+										{children}
+									</strong>
+								),
+							}}
+						>
+							{generateObjectDiffMessage(item)}
+						</Markdown>
+						<span className="text-muted-foreground mx-1">by</span>
+						<UserAvatar
+							user={item.actor}
+							className="h-5 w-5 inline-block"
+						/>
+						<span className="text-sm font-medium text-foreground">
+							{item.actor.firstName || item.actor.email}
+						</span>
+					</div>
 				</div>
 			</div>
-		</div>
+		</button>
 	);
 }
 
 export function ActivityFeed() {
 	const { projectId } = useParams();
 	const trpcClient = useTRPCClient();
+	const [selectedActivityId, setSelectedActivityId] = useQueryState(
+		"activity",
+		parseAsInteger,
+	);
 
 	const {
 		data: activitiesData,
@@ -133,19 +125,16 @@ export function ActivityFeed() {
 	}
 
 	return (
-		<div className="flex flex-col w-full max-w-2xl mx-auto">
+		<div className="flex flex-col w-full">
 			{activities.length ? (
 				<>
-					<div>
-						{activities.map((activityItem, index) => (
-							<div key={activityItem.id}>
-								<ActivityItem item={activityItem} />
-								{index < activities.length - 1 && (
-									<div className="flex justify-center py-2">
-										<div className="w-24 h-px bg-border" />
-									</div>
-								)}
-							</div>
+					<div className="divide-y divide-border">
+						{activities.map((activityItem) => (
+							<ActivityItem
+								key={activityItem.id}
+								item={activityItem}
+								onSelect={(id) => setSelectedActivityId(id)}
+							/>
 						))}
 					</div>
 
@@ -177,10 +166,17 @@ export function ActivityFeed() {
 						No activity yet
 					</h3>
 					<p className="mt-1 text-sm text-muted-foreground max-w-xs">
-						Activity will appear here as you and your team make changes to this
-						project.
+						Activity will appear here as you and your team make changes to
+						this project.
 					</p>
 				</div>
+			)}
+
+			{selectedActivityId && (
+				<ActivityDetailPanel
+					activityId={selectedActivityId}
+					onClose={() => setSelectedActivityId(null)}
+				/>
 			)}
 		</div>
 	);

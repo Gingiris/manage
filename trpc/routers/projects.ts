@@ -452,6 +452,7 @@ export const projectsRouter = createTRPCRouter({
 								id: true,
 								firstName: true,
 								image: true,
+								email: true,
 							},
 						},
 					},
@@ -463,5 +464,43 @@ export const projectsRouter = createTRPCRouter({
 				.execute();
 
 			return activities;
+		}),
+	getActivityById: protectedProcedure
+		.input(z.object({ id: z.number(), projectId: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const hasAccess = await canViewProject(ctx, input.projectId);
+			if (!hasAccess) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Project access denied",
+				});
+			}
+
+			const activityItem = await ctx.db.query.activity.findFirst({
+				with: {
+					actor: {
+						columns: {
+							id: true,
+							firstName: true,
+							lastName: true,
+							image: true,
+							email: true,
+						},
+					},
+				},
+				where: and(
+					eq(activity.id, input.id),
+					eq(activity.projectId, input.projectId),
+				),
+			});
+
+			if (!activityItem) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Activity not found",
+				});
+			}
+
+			return activityItem;
 		}),
 });
