@@ -87,9 +87,9 @@ export function ActivityDetailPanel({
 				<>
 					<div className="flex items-start justify-between p-4 border-b">
 						<div className="flex items-start gap-3">
-							<div className={`p-2 rounded-lg ${actionConfig?.bg}`}>
+							<div className={`p-2 ${actionConfig?.containerClassName}`}>
 								<ActionIcon
-									className={`h-5 w-5 ${actionConfig?.color}`}
+									className={actionConfig?.iconClassName ?? "h-4 w-4 text-muted-foreground"}
 								/>
 							</div>
 							<div>

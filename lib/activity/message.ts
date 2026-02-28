@@ -5,13 +5,29 @@ import { guessTimezone, toDateStringWithDay } from "../utils/date";
 export function getActionIcon(action: string) {
 	switch (action) {
 		case "created":
-			return { icon: Plus, color: "text-emerald-500", bg: "bg-emerald-500/10" };
+			return {
+				icon: Plus,
+				iconClassName: "h-4 w-4 text-emerald-500",
+				containerClassName: "rounded-lg bg-emerald-500/10",
+			};
 		case "updated":
-			return { icon: RefreshCw, color: "text-amber-500", bg: "bg-amber-500/10" };
+			return {
+				icon: RefreshCw,
+				iconClassName: "h-4 w-4 text-amber-500",
+				containerClassName: "rounded-lg bg-amber-500/10",
+			};
 		case "deleted":
-			return { icon: Trash2, color: "text-red-500", bg: "bg-red-500/10" };
+			return {
+				icon: Trash2,
+				iconClassName: "h-4 w-4 text-red-500",
+				containerClassName: "rounded-lg bg-red-500/10",
+			};
 		default:
-			return { icon: ActivityIcon, color: "text-muted-foreground", bg: "bg-muted" };
+			return {
+				icon: ActivityIcon,
+				iconClassName: "h-4 w-4 text-muted-foreground",
+				containerClassName: "rounded-lg bg-muted",
+			};
 	}
 }
 

@@ -35,10 +35,8 @@ export function ActivityItem({
 			className="w-full text-left py-4 px-4 hover:bg-muted/40 rounded-lg transition-colors cursor-pointer"
 		>
 			<div className="flex items-start gap-3">
-				<div
-					className={`p-1.5 rounded-lg ${actionConfig.bg} mt-0.5 shrink-0`}
-				>
-					<ActionIcon className={`h-4 w-4 ${actionConfig.color}`} />
+				<div className={`p-1.5 mt-0.5 shrink-0 ${actionConfig.containerClassName}`}>
+					<ActionIcon className={actionConfig.iconClassName} />
 				</div>
 
 				<div className="flex-1 min-w-0">
