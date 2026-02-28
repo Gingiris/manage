@@ -117,6 +117,62 @@ function generateContextualMessage(
 	}
 }
 
+const typeLabels: Record<string, string> = {
+	tasklist: "TaskList",
+	task: "Task",
+	project: "Project",
+	blob: "File",
+	event: "Event",
+	comment: "Comment",
+	post: "Post",
+};
+
+export function formatEventTypeLabel(type: string, action: string): string {
+	return `${typeLabels[type] || type}.${action}`;
+}
+
+export function getEventDescription(type: string, action: string): string {
+	const descriptions: Record<string, Record<string, string>> = {
+		task: {
+			created: "A new task was added to the project.",
+			updated: "An existing task was modified.",
+			deleted: "A task was removed from the project.",
+		},
+		tasklist: {
+			created: "A new task list was created.",
+			updated: "A task list was modified.",
+			deleted: "A task list was removed.",
+		},
+		project: {
+			created: "A new project was created.",
+			updated: "Project settings or details were modified.",
+			deleted: "A project was removed.",
+		},
+		blob: {
+			created: "A file was uploaded.",
+			updated: "A file was modified.",
+			deleted: "A file was removed.",
+		},
+		event: {
+			created: "A new calendar event was created.",
+			updated: "A calendar event was modified.",
+			deleted: "A calendar event was removed.",
+		},
+		comment: {
+			created: "A comment was added.",
+			updated: "A comment was edited.",
+			deleted: "A comment was removed.",
+		},
+		post: {
+			created: "A new post was published.",
+			updated: "A post was edited.",
+			deleted: "A post was removed.",
+		},
+	};
+
+	return descriptions[type]?.[action] || `${typeLabels[type] || type} was ${action}.`;
+}
+
 export function generateObjectDiffMessage(item: ActivityWithActor) {
 	// biome-ignore lint/suspicious/noExplicitAny: type casting for activity values
 	const newValue = item.newValue as any;

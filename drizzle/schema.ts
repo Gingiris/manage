@@ -226,10 +226,12 @@ export const commentRelations = relations(comment, ({ one }) => ({
 
 export const activity = pgTable("activity", {
 	id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+	eventId: text("eventId"),
 	action: text("action").notNull(),
 	type: text("type").notNull(),
 	oldValue: jsonb("oldValue"),
 	newValue: jsonb("newValue"),
+	metadata: jsonb("metadata"),
 	target: text("target"),
 	projectId: integer("projectId")
 		.notNull()
