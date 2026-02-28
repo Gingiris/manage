@@ -13,10 +13,10 @@ import type { ActivityWithActor } from "@/drizzle/types";
 import {
 	formatEventTypeLabel,
 	generateObjectDiffMessage,
-	getActionIcon,
 } from "@/lib/activity/message";
 import { guessTimezone, toDateTimeString } from "@/lib/utils/date";
 import { useTRPCClient } from "@/trpc/client";
+import { ActionIcon } from "./action-icon";
 import { ActivityDetailPanel } from "./activity-detail-panel";
 
 const ACTIVITIES_LIMIT = 25;
@@ -25,9 +25,6 @@ export function ActivityItem({
 	item,
 	onSelect,
 }: { item: ActivityWithActor; onSelect: (id: number) => void }) {
-	const actionConfig = getActionIcon(item.action);
-	const ActionIcon = actionConfig.icon;
-
 	return (
 		<button
 			type="button"
@@ -35,9 +32,7 @@ export function ActivityItem({
 			className="w-full text-left py-4 px-4 hover:bg-muted/40 rounded-lg transition-colors cursor-pointer"
 		>
 			<div className="flex items-start gap-3">
-				<div className={`p-1.5 mt-0.5 shrink-0 ${actionConfig.containerClassName}`}>
-					<ActionIcon className={actionConfig.iconClassName} />
-				</div>
+				<ActionIcon action={item.action} className="mt-0.5" />
 
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center justify-between gap-2">

@@ -1,24 +1,18 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-	CalendarIcon,
-	CompassIcon,
-	RefreshCw,
-	UserIcon,
-	X,
-} from "lucide-react";
+import { CalendarIcon, CompassIcon, UserIcon, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { Panel } from "@/components/core/panel";
 import { UserAvatar } from "@/components/core/user-avatar";
 import { SpinnerWithSpacing } from "@/components/core/loaders";
 import {
 	formatEventTypeLabel,
-	getActionIcon,
 	getEventDescription,
 } from "@/lib/activity/message";
 import { guessTimezone, toFullDateTimeString } from "@/lib/utils/date";
 import { useTRPCClient } from "@/trpc/client";
+import { ActionIcon } from "./action-icon";
 
 function SectionLabel({
 	icon: Icon,
@@ -64,9 +58,6 @@ export function ActivityDetailPanel({
 			}),
 	});
 
-	const actionConfig = item ? getActionIcon(item.action) : null;
-	const ActionIcon = actionConfig?.icon ?? RefreshCw;
-
 	return (
 		<Panel
 			open={true}
@@ -87,11 +78,7 @@ export function ActivityDetailPanel({
 				<>
 					<div className="flex items-start justify-between p-4 border-b">
 						<div className="flex items-start gap-3">
-							<div className={`p-2 ${actionConfig?.containerClassName}`}>
-								<ActionIcon
-									className={actionConfig?.iconClassName ?? "h-4 w-4 text-muted-foreground"}
-								/>
-							</div>
+							<ActionIcon action={item.action} />
 							<div>
 								<h2 className="font-semibold text-lg">
 									{formatEventTypeLabel(item.type, item.action)}

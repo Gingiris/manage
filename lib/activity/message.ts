@@ -1,35 +1,5 @@
-import { ActivityIcon, Plus, RefreshCw, Trash2 } from "lucide-react";
 import type { ActivityWithActor } from "@/drizzle/types";
 import { guessTimezone, toDateStringWithDay } from "../utils/date";
-
-export function getActionIcon(action: string) {
-	switch (action) {
-		case "created":
-			return {
-				icon: Plus,
-				iconClassName: "h-4 w-4 text-emerald-500",
-				containerClassName: "rounded-lg bg-emerald-500/10",
-			};
-		case "updated":
-			return {
-				icon: RefreshCw,
-				iconClassName: "h-4 w-4 text-amber-500",
-				containerClassName: "rounded-lg bg-amber-500/10",
-			};
-		case "deleted":
-			return {
-				icon: Trash2,
-				iconClassName: "h-4 w-4 text-red-500",
-				containerClassName: "rounded-lg bg-red-500/10",
-			};
-		default:
-			return {
-				icon: ActivityIcon,
-				iconClassName: "h-4 w-4 text-muted-foreground",
-				containerClassName: "rounded-lg bg-muted",
-			};
-	}
-}
 
 // biome-ignore lint/suspicious/noExplicitAny: flexible date parameter handling
 function toDateString(date: any) {
