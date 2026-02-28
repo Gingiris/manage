@@ -4,9 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
 	CalendarIcon,
 	CompassIcon,
-	Plus,
 	RefreshCw,
-	Trash2,
 	UserIcon,
 	X,
 } from "lucide-react";
@@ -16,57 +14,11 @@ import { UserAvatar } from "@/components/core/user-avatar";
 import { SpinnerWithSpacing } from "@/components/core/loaders";
 import {
 	formatEventTypeLabel,
+	getActionIcon,
 	getEventDescription,
 } from "@/lib/activity/message";
-import { guessTimezone } from "@/lib/utils/date";
+import { guessTimezone, toFullDateTimeString } from "@/lib/utils/date";
 import { useTRPCClient } from "@/trpc/client";
-
-function getActionIcon(action: string) {
-	switch (action) {
-		case "created":
-			return { icon: Plus, color: "text-emerald-500", bg: "bg-emerald-500/10" };
-		case "updated":
-			return {
-				icon: RefreshCw,
-				color: "text-amber-500",
-				bg: "bg-amber-500/10",
-			};
-		case "deleted":
-			return { icon: Trash2, color: "text-red-500", bg: "bg-red-500/10" };
-		default:
-			return {
-				icon: RefreshCw,
-				color: "text-muted-foreground",
-				bg: "bg-muted",
-			};
-	}
-}
-
-function formatLocalTime(date: Date, timeZone: string): string {
-	return date.toLocaleString("en-US", {
-		timeZone,
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-		second: "2-digit",
-		hour12: true,
-	});
-}
-
-function formatUTCTime(date: Date): string {
-	return date.toLocaleString("en-US", {
-		timeZone: "UTC",
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-		second: "2-digit",
-		hour12: true,
-	});
-}
 
 function SectionLabel({
 	icon: Icon,
@@ -103,8 +55,8 @@ export function ActivityDetailPanel({
 	const { projectId } = useParams();
 	const trpcClient = useTRPCClient();
 
-	const { data: item, isPending } = useQuery({
-		queryKey: ["projects", "getActivityById", activityId],
+	const { data: item, isPending, isError } = useQuery({
+		queryKey: ["projects", "getActivityById", +projectId!, activityId],
 		queryFn: () =>
 			trpcClient.projects.getActivityById.query({
 				id: activityId,
@@ -123,7 +75,13 @@ export function ActivityDetailPanel({
 			}}
 			title="Activity Details"
 		>
-			{isPending || !item ? (
+			{isError ? (
+				<div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+					<p className="text-sm text-muted-foreground">
+						Failed to load activity details.
+					</p>
+				</div>
+			) : isPending || !item ? (
 				<SpinnerWithSpacing />
 			) : (
 				<>
@@ -165,14 +123,14 @@ export function ActivityDetailPanel({
 							<div className="rounded-lg border overflow-hidden">
 								<DataRow
 									label="Local"
-									value={formatLocalTime(
+									value={toFullDateTimeString(
 										new Date(item.createdAt),
 										guessTimezone,
 									)}
 								/>
 								<DataRow
 									label="UTC"
-									value={formatUTCTime(new Date(item.createdAt))}
+									value={toFullDateTimeString(new Date(item.createdAt), "UTC")}
 								/>
 								<DataRow
 									label="ISO"
@@ -208,8 +166,6 @@ export function ActivityDetailPanel({
 														email: item.actor.email,
 													},
 													session: {
-														id: (item.metadata as Record<string, unknown>)
-															.sessionId,
 														ipAddress: (
 															item.metadata as Record<string, unknown>
 														).ipAddress,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ActivityIcon, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ActivityIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useMemo } from "react";
@@ -13,33 +13,13 @@ import type { ActivityWithActor } from "@/drizzle/types";
 import {
 	formatEventTypeLabel,
 	generateObjectDiffMessage,
+	getActionIcon,
 } from "@/lib/activity/message";
 import { guessTimezone, toDateTimeString } from "@/lib/utils/date";
 import { useTRPCClient } from "@/trpc/client";
 import { ActivityDetailPanel } from "./activity-detail-panel";
 
 const ACTIVITIES_LIMIT = 25;
-
-function getActionIcon(action: string) {
-	switch (action) {
-		case "created":
-			return { icon: Plus, color: "text-emerald-500", bg: "bg-emerald-500/10" };
-		case "updated":
-			return {
-				icon: RefreshCw,
-				color: "text-amber-500",
-				bg: "bg-amber-500/10",
-			};
-		case "deleted":
-			return { icon: Trash2, color: "text-red-500", bg: "bg-red-500/10" };
-		default:
-			return {
-				icon: ActivityIcon,
-				color: "text-muted-foreground",
-				bg: "bg-muted",
-			};
-	}
-}
 
 export function ActivityItem({
 	item,

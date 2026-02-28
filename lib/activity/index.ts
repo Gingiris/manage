@@ -41,18 +41,15 @@ export async function logActivity({
 		null;
 	const userAgent = reqHeaders.get("user-agent") || null;
 
-	let sessionId: string | null = null;
 	let userEmail: string | null = null;
 	try {
 		const session = await auth.api.getSession({ headers: reqHeaders });
-		sessionId = session?.session?.id || null;
 		userEmail = session?.user?.email || null;
 	} catch {}
 
 	const metadata = {
 		ipAddress,
 		userAgent,
-		sessionId,
 		userEmail,
 	};
 
