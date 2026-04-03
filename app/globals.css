@@ -103,6 +103,21 @@ textarea {
 	background-color: transparent !important;
 }
 
+.bn-preview.bn-editor {
+	padding-inline: 0 !important;
+}
+
+.bn-preview table {
+	border-collapse: collapse;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.dark .bn-preview [data-content-type=table] th,
+.dark .bn-preview [data-content-type=table] td {
+	border-color: hsl(var(--border));
+}
+
 @media screen and (max-width: 768px) {
 	.cl-userPreview {
 		gap: 0rem;

@@ -12,7 +12,7 @@ export const HtmlPreview = ({ content }: { content: string }) => {
 		<>
 			<div
 				ref={containerRef}
-				className="block"
+				className="bn-editor bn-default-styles bn-preview"
 				suppressHydrationWarning
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: Using DOMPurify for sanitization
 				dangerouslySetInnerHTML={{ __html: content }}
